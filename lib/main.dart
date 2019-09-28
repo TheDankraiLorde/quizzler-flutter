@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quizzler/question.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -26,12 +28,20 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Icon> scoreKeeper = <Icon>[];
-  List<String> questions = <String>[
-    'You can lead a cow down stairs but not up stairs.',
-    'Approximately one quarter of human bones are in the feet.',
-    'A slug\'s blood is green.',
+  List<Question> qx = <Question>[
+    Question(
+      q: "You can lead a cow down stairs but not up stairs.",
+      a: false,
+    ),
+    Question(
+      q: "Approximately one quarter of human bones are in the feet.",
+      a: true,
+    ),
+    Question(
+      q: "A slug\'s blood is green.",
+      a: true,
+    ),
   ];
-  List<bool> answers = [false, true, true];
   int questionNumber = 0;
 
   @override
@@ -47,7 +57,7 @@ class _QuizPageState extends State<QuizPage> {
               padding: EdgeInsets.all(10.0),
               child: Center(
                 child: Text(
-                  questions[questionNumber % questions.length],
+                  qx[questionNumber % qx.length].questionText,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 25.0,
@@ -71,18 +81,8 @@ class _QuizPageState extends State<QuizPage> {
                   ),
                 ),
                 onPressed: () {
-                  bool corrAns = answers[questionNumber % answers.length];
-                  if (corrAns == true) {
-                    print("Right");
-                  } else
-                    print("Wrong");
-                  setState(() {
-                    scoreKeeper.add(Icon(
-                      Icons.check,
-                      color: Colors.green,
-                    ));
-                    questionNumber++;
-                  });
+                  bool corrAns = qx[questionNumber % qx.length].quesAns;
+                  addIcon(iconVal: (corrAns == true));
                 },
               ),
             ),
@@ -101,19 +101,8 @@ class _QuizPageState extends State<QuizPage> {
                 ),
                 onPressed: () {
                   setState(() {
-                    bool corrAns = answers[questionNumber % answers.length];
-                    if (corrAns == false) {
-                      print("Correct");
-                    } else {
-                      print("Wrong");
-                    }
-                    setState(() {
-                      scoreKeeper.add(Icon(
-                        Icons.check,
-                        color: Colors.green,
-                      ));
-                      questionNumber++;
-                    });
+                    bool corrAns = qx[questionNumber % qx.length].quesAns;
+                    addIcon(iconVal: corrAns == false);
                   });
                 },
               ),
@@ -123,6 +112,39 @@ class _QuizPageState extends State<QuizPage> {
         ],
       ),
     );
+  }
+
+  void addIcon({bool iconVal}) {
+    setState(() {
+      if (questionNumber < qx.length - 1) {
+        scoreKeeper.add(Icon(
+          (iconVal ? (Icons.check) : (Icons.close)),
+          color: (iconVal ? Colors.green : Colors.red),
+        ));
+        questionNumber++;
+      } else {
+        Alert(
+          context: context,
+          title: "Questions Exhausted!",
+          desc: "The questions will start from the beginning again.",
+          buttons: [
+            DialogButton(
+                child: Text(
+                  "OK",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                }),
+          ],
+        ).show();
+        questionNumber = 0;
+        scoreKeeper.clear();
+      }
+    });
   }
 }
 
